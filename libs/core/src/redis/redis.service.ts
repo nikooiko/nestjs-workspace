@@ -1,7 +1,9 @@
-import { Inject, Injectable, Logger, OnModuleDestroy } from '@nestjs/common';
+import { Inject, Injectable, OnModuleDestroy } from '@nestjs/common';
 import Redis from 'ioredis';
 import { ConfigType } from '@nestjs/config';
 import redisConfig from './config/redis.config';
+import { Logger } from 'winston';
+import { LOGGER } from '@app/core/logger/factories/logger.factory';
 
 /**
  * This service should be used by modules that require direct access to ioredis client. The rest should use
@@ -9,11 +11,10 @@ import redisConfig from './config/redis.config';
  */
 @Injectable()
 export class RedisService extends Redis implements OnModuleDestroy {
-  private readonly logger = new Logger(RedisService.name);
-
   constructor(
     @Inject(redisConfig.KEY)
     private readonly serviceConfig: ConfigType<typeof redisConfig>,
+    @Inject(LOGGER) private logger: Logger,
   ) {
     super({ ...serviceConfig });
 
@@ -27,15 +28,14 @@ export class RedisService extends Redis implements OnModuleDestroy {
 
   onModuleDestroy() {
     this.disconnect(false);
-    console.log('disconnect');
   }
 
   private handleConnect() {
-    this.logger.log('Redis connecting...', { type: 'REDIS_CONNECTING' });
+    this.logger.info('Redis connecting...', { type: 'REDIS_CONNECTING' });
   }
 
   private handleReady() {
-    this.logger.log('Redis connected!', { type: 'REDIS_CONNECTED' });
+    this.logger.info('Redis connected!', { type: 'REDIS_CONNECTED' });
   }
 
   private handleClose() {
@@ -43,7 +43,7 @@ export class RedisService extends Redis implements OnModuleDestroy {
   }
 
   private handleReconnecting() {
-    this.logger.log('Redis reconnecting!', { type: 'REDIS_RECONNECTING' });
+    this.logger.info('Redis reconnecting!', { type: 'REDIS_RECONNECTING' });
   }
 
   private handleEnd() {
