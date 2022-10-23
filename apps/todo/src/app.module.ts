@@ -5,13 +5,17 @@ import { CookiesModule } from '@app/core/cookies/cookies.module';
 import { RedisModule } from '@app/core/redis/redis.module';
 import { LoggerModule } from '@app/core/logger/logger.module';
 import { LOGGER } from '@app/core/logger/factories/logger.factory';
+import { ValidationModule } from '@app/core/validation/validation.module';
+import { TodoModule } from './todo/todo.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot(),
     LoggerModule /* global */,
+    ValidationModule,
     CookiesModule,
     RedisModule,
+    TodoModule,
   ],
   controllers: [],
   providers: [],
