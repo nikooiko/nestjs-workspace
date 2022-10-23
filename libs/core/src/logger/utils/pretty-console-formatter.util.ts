@@ -12,7 +12,7 @@ const knownMeta = ['layer', 'service', 'context', 'level', 'type'];
  * @param {'suffix'|'prefix'|'none'} [dot='suffix']
  */
 const formatField = (
-  field: any,
+  field: string,
   dot: 'suffix' | 'prefix' | 'none' = 'suffix',
 ): string => {
   if (!field) {
@@ -20,7 +20,7 @@ const formatField = (
   }
   switch (dot) {
     case 'suffix':
-      return field.concat('');
+      return field.concat('.');
     case 'prefix':
       return '.'.concat(field);
     default:

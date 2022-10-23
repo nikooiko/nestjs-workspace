@@ -6,11 +6,13 @@ import { CookiesModule } from '@app/core/cookies/cookies.module';
 import { RedisModule } from '@app/core/redis/redis.module';
 import { LOGGER } from '@app/core/logger/factories/logger.factory';
 import { AppController } from './app.controller';
+import { ValidationModule } from '@app/core/validation/validation.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot(),
     LoggerModule /* global */,
+    ValidationModule,
     CookiesModule,
     RedisModule,
   ],
