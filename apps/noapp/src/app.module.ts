@@ -1,12 +1,11 @@
 import { Inject, Module, OnApplicationBootstrap } from '@nestjs/common';
-import { Logger } from 'winston';
 import { ConfigModule } from '@nestjs/config';
+import { Logger } from 'winston';
+import { LoggerModule } from '@app/core/logger/logger.module';
 import { CookiesModule } from '@app/core/cookies/cookies.module';
 import { RedisModule } from '@app/core/redis/redis.module';
-import { LoggerModule } from '@app/core/logger/logger.module';
 import { LOGGER } from '@app/core/logger/factories/logger.factory';
 import { AppController } from './app.controller';
-import { AppService } from './app.service';
 
 @Module({
   imports: [
@@ -16,7 +15,7 @@ import { AppService } from './app.service';
     RedisModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [],
 })
 export class AppModule implements OnApplicationBootstrap {
   constructor(@Inject(LOGGER) private logger: Logger) {}

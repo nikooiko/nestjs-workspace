@@ -11,7 +11,9 @@
     "^.+\\.(t|j)s$": "ts-jest"
   },
   "moduleNameMapper": {
-    "@app/core/(.*)": "<rootDir>/libs/core/src/$1",
-    "@app/core": "<rootDir>/libs/core/src"
-  }
+    "^@app/core(|/.*)$": "<rootDir>../../libs/core/src/$1"
+  },
+  "setupFiles": [
+    "<rootDir>/test/setEnvVars.ts"
+  ]
 }

@@ -1,7 +1,13 @@
 {
   "$schema": "https://json.schemastore.org/nest-cli",
   "collection": "@nestjs/schematics",
-  "sourceRoot": "src",
+  "root": "apps/todo",
+  "sourceRoot": "apps/noapp/src",
+  "monorepo": true,
+  "compilerOptions": {
+    "webpack": true,
+    "tsConfigPath": "apps/noapp/tsconfig.app.json"
+  },
   "projects": {
     "core": {
       "type": "library",
@@ -11,9 +17,24 @@
       "compilerOptions": {
         "tsConfigPath": "libs/core/tsconfig.lib.json"
       }
+    },
+    "todo": {
+      "type": "application",
+      "root": "apps/todo",
+      "entryFile": "main",
+      "sourceRoot": "apps/todo/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/todo/tsconfig.app.json"
+      }
+    },
+    "noapp": {
+      "type": "application",
+      "root": "apps/noapp",
+      "entryFile": "main",
+      "sourceRoot": "apps/noapp/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/noapp/tsconfig.app.json"
+      }
     }
-  },
-  "compilerOptions": {
-    "webpack": true
   }
 }
