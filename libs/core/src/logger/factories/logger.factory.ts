@@ -1,7 +1,5 @@
 import { ConfigService, ConfigType } from '@nestjs/config';
-import loggerConfig, {
-  LOGGER_CONFIG_KEY,
-} from '@app/core/logger/config/logger.config';
+import loggerConfig, { LOGGER_CONFIG_KEY } from '../config/logger.config';
 import winston from 'winston';
 import { Scope } from '@nestjs/common';
 import { INQUIRER } from '@nestjs/core';

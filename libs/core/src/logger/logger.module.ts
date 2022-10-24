@@ -3,7 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import loggerConfig from './config/logger.config';
 import { NestJSLoggerService } from './services/nestjs-logger.service';
 import { LOGGER, loggerFactory } from './factories/logger.factory';
-import { LogHttp } from '@app/core/logger/middleware/log-http.service';
+import { LogHttp } from './middleware/log-http.service';
 
 /**
  * This module introduces 2 different loggers that play on top of winston, one for the application logic

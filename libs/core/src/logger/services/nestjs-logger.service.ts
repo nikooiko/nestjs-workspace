@@ -1,7 +1,7 @@
 import { Inject, Injectable, LoggerService } from '@nestjs/common';
 import winston, { Logger } from 'winston';
 import { ConfigType } from '@nestjs/config';
-import loggerConfig from '@app/core/logger/config/logger.config';
+import loggerConfig from '../config/logger.config';
 
 @Injectable()
 export class NestJSLoggerService implements LoggerService {
