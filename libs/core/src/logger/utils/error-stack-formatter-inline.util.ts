@@ -14,20 +14,18 @@ export const errorStackFormatterInline = winston.format(
     if (info.level !== 'error') {
       return info;
     }
-    const errorField =
-      ['stack', ...errorFields].find((field) => info[field]) || 'stack';
-    const stackOrError = info[errorField];
-    const stack = stackOrError?.stack || stackOrError;
-    // nothing can be done if no stack found
-    if (!stack) {
-      return info;
-    }
-    delete info[errorField]; // delete this field from metadata, for prettier logs
-    if (stackOrError?.message) {
+    const errorField = errorFields.find((field) => info[field]) || 'stack';
+    const error = info[errorField];
+    const stack = info.stack || error?.stack;
+    if (error?.message) {
+      delete info[errorField]; // delete this field from metadata, for prettier logs
       // it was a traditional error so keep its message also
-      info.message += `: ${stackOrError.message}`;
+      info.message += `: ${error.message}`;
     }
-    info.message += `\n${stack}\n`;
+    if (stack) {
+      delete info.stack; // delete this field from metadata, for prettier logs
+      info.message += `\n${stack}\n`;
+    }
     return info;
   },
 );

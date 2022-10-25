@@ -25,6 +25,7 @@ export const errorStackFormatter = winston.format(
     if (!error?.stack) {
       return info;
     }
+    // error contains stack, so split it into two different fields
     info[errorField] = error.message;
     info.stack = error.stack;
     return info;
