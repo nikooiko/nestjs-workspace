@@ -14,5 +14,11 @@ datasource db {
 model Todo {
   id     String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   title  String
-  status String
+  status TodoStatus
+}
+
+enum TodoStatus {
+  todo
+  doing
+  done
 }
