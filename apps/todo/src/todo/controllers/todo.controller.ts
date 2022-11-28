@@ -1,7 +1,17 @@
-import { Body, Controller, HttpCode, Param, Patch, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  Patch,
+  Post,
+  Query,
+} from '@nestjs/common';
 import {
   ApiBody,
   ApiCreatedResponse,
+  ApiNoContentResponse,
   ApiOkResponse,
   ApiOperation,
   ApiTags,
@@ -10,10 +20,34 @@ import { ApiAppBadRequestResponse } from '@app/core/api/decorators/api-app-bad-r
 import { TodoDto } from '../dto/todo.dto';
 import { CreateTodoDto } from '../dto/create-todo.dto';
 import { UpdateTodoDto } from '../dto/update-todo.dto';
+import { TodoService } from '../services/todo.service';
+import { FindAllTodosQueryDto } from '../dto/find-all-todos-query.dto';
+import { TodosListDto } from '../dto/todos-list.dto';
+import { UUIDParam } from '@app/core/api/decorators/uuid-param.decorator';
+import { ApiAppNotFoundResponse } from '@app/core/api/decorators/api-app-not-found-response.decorator';
 
 @ApiTags('Todo')
 @Controller('todo')
 export class TodoController {
+  constructor(private readonly todoService: TodoService) {}
+
+  @Get()
+  @HttpCode(200)
+  @ApiOperation({
+    summary: 'Returns the list of Todos',
+  })
+  @ApiOkResponse({ type: TodosListDto })
+  async findAll(@Query() query: FindAllTodosQueryDto): Promise<TodosListDto> {
+    const { limit, page } = query;
+    const { items, count } = await this.todoService.findAll({ page, limit });
+    return {
+      limit,
+      pages: Math.ceil(count / limit),
+      items,
+      count,
+    };
+  }
+
   @Post()
   @HttpCode(201)
   @ApiOperation({
@@ -26,8 +60,8 @@ export class TodoController {
     type: TodoDto,
   })
   @ApiAppBadRequestResponse()
-  async createTodo(@Body() data: CreateTodoDto): Promise<string> {
-    return `created todo: ${data.title}`;
+  async create(@Body() data: CreateTodoDto): Promise<TodoDto> {
+    return this.todoService.create(data);
   }
 
   @Patch(':id')
@@ -41,11 +75,24 @@ export class TodoController {
   @ApiOkResponse({
     type: TodoDto,
   })
+  @ApiAppNotFoundResponse()
   @ApiAppBadRequestResponse()
-  async updateTodo(
-    @Param('id') id: string,
+  async update(
+    @UUIDParam() id: string,
     @Body() data: UpdateTodoDto,
-  ): Promise<string> {
-    return `updated todo ${id} with ${data.title}`;
+  ): Promise<TodoDto> {
+    return this.todoService.update(id, data);
+  }
+
+  @Delete(':id')
+  @HttpCode(204)
+  @ApiOperation({
+    summary: 'Deletes the Todo.',
+  })
+  @ApiNoContentResponse()
+  @ApiAppNotFoundResponse()
+  @ApiAppBadRequestResponse()
+  async delete(@UUIDParam() id: string): Promise<void> {
+    return this.todoService.delete(id);
   }
 }

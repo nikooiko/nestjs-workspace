@@ -1,10 +1,10 @@
-import { TodoStatus } from '../enums/todo-status.enum';
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEnum, IsString } from 'class-validator';
+import { IsEnum, IsString, IsUUID } from 'class-validator';
+import { Todo, TodoStatus } from '@app/todo/prisma-client';
 
-export class TodoDto {
+export class TodoDto implements Todo {
   @ApiProperty()
-  @IsString()
+  @IsUUID()
   id: string;
 
   @ApiProperty()
