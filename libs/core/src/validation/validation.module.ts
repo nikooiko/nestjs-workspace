@@ -1,7 +1,13 @@
 import { Module } from '@nestjs/common';
-import { validationFactory } from '@app/core/validation/factories/validation.factory';
+import { APP_PIPE } from '@nestjs/core';
+import { AppValidationPipe } from '@app/core/validation/pipes/app-validation.pipe';
 
 @Module({
-  providers: [validationFactory],
+  providers: [
+    {
+      provide: APP_PIPE,
+      useClass: AppValidationPipe,
+    },
+  ],
 })
 export class ValidationModule {}
