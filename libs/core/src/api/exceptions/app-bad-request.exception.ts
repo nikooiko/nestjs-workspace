@@ -1,6 +1,14 @@
+import { AppValidationError } from '@app/core/validation/types/AppValidationError';
 import { BadRequestException, HttpStatus } from '@nestjs/common';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import {
+  ApiExtraModels,
+  ApiProperty,
+  ApiPropertyOptional,
+  getSchemaPath,
+} from '@nestjs/swagger';
+import { APP_VALIDATION_ERROR } from '@app/core/validation/constants/app-validation-error.constant';
 
+@ApiExtraModels(AppValidationError)
 export class AppBadRequestException extends BadRequestException {
   static DESC_DEFAULT = 'Bad Request';
   static ERROR_DEFAULT = 'bad_request';
@@ -15,9 +23,20 @@ export class AppBadRequestException extends BadRequestException {
   @ApiProperty({ example: HttpStatus.BAD_REQUEST })
   statusCode: number;
 
-  @ApiProperty({ example: AppBadRequestException.DESC_DEFAULT })
-  message: string;
+  @ApiProperty({
+    oneOf: [
+      {
+        // first element is also the example
+        type: 'array',
+        items: { $ref: getSchemaPath(AppValidationError) },
+      },
+      {
+        type: 'string',
+      },
+    ],
+  })
+  message: any;
 
-  @ApiPropertyOptional({ example: AppBadRequestException.ERROR_DEFAULT })
+  @ApiPropertyOptional({ example: APP_VALIDATION_ERROR }) // as we give AppValidationError as example, we also give the corresponding error as example
   error?: string;
 }
