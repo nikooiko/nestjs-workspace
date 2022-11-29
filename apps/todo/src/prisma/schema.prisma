@@ -29,7 +29,20 @@ model User {
   createdAt DateTime @default(now()) @db.Timestamptz(6)
   updatedAt DateTime @updatedAt @db.Timestamptz(6)
 
-  todos Todo[]
+  todos   Todo[]
+  Profile Profile?
+}
+
+model Profile {
+  id        Int    @id @default(autoincrement())
+  firstName String
+  lastName  String
+
+  createdAt DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @db.Timestamptz(6)
+
+  owner   User   @relation(fields: [ownerId], references: [id])
+  ownerId String @unique @db.Uuid
 }
 
 enum TodoStatus {
