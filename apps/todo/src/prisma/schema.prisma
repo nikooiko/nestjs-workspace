@@ -12,11 +12,24 @@ datasource db {
 }
 
 model Todo {
-  id     String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  title  String
-  status TodoStatus
+  id        String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title     String
+  status    TodoStatus
+  createdAt DateTime   @default(now()) @db.Timestamptz(6)
+  updatedAt DateTime   @updatedAt @db.Timestamptz(6)
+
+  owner   User   @relation(fields: [ownerId], references: [id])
+  ownerId String @db.Uuid
+}
+
+model User {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email     String   @unique
+  password  String
   createdAt DateTime @default(now()) @db.Timestamptz(6)
   updatedAt DateTime @updatedAt @db.Timestamptz(6)
+
+  todos Todo[]
 }
 
 enum TodoStatus {
