@@ -56,7 +56,7 @@ export const prettyConsoleFormatter = winston.format(
     const { message, layer, service, context, level, type, ...rest } = info;
     const levelColor = colorByLevel(level);
     const serviceInfo = `[${formatField(service)}${layer}]`.padEnd(
-      (service?.length || 0) + 6,
+      (service?.length || 0) + 7,
       ' ',
     );
     const pid = `${process.pid} `;
