@@ -7,6 +7,8 @@ import { LoggerModule } from '@app/core/logger/logger.module';
 import { LOGGER } from '@app/core/logger/factories/logger.factory';
 import { ValidationModule } from '@app/core/validation/validation.module';
 import { TodoModule } from './todo/todo.module';
+import { AuthModule } from './auth/auth.module';
+import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [
@@ -15,6 +17,8 @@ import { TodoModule } from './todo/todo.module';
     ValidationModule,
     CookiesModule,
     RedisModule,
+    AuthModule,
+    UsersModule,
     TodoModule,
   ],
   controllers: [],

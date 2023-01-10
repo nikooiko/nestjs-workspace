@@ -7,7 +7,7 @@ export function ApiAppNotFoundResponse(options?: ApiResponseOptions) {
   return applyDecorators(
     ApiNotFoundResponse({
       type: AppNotFoundException,
-      description: 'Not Found.',
+      description: AppNotFoundException.DESC_DEFAULT,
       ...options,
     }),
   );

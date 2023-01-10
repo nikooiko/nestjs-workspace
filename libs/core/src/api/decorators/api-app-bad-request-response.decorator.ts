@@ -7,7 +7,7 @@ export function ApiAppBadRequestResponse(options?: ApiResponseOptions) {
   return applyDecorators(
     ApiBadRequestResponse({
       type: AppBadRequestException,
-      description: 'Bad request.',
+      description: AppBadRequestException.DESC_DEFAULT,
       ...options,
     }),
   );
