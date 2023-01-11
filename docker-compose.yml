@@ -1,0 +1,28 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: "postgres:15.1"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/pgdata
+  redis:
+    image: "redis:7.0.5"
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    networks:
+      app_net:
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  app_net:
