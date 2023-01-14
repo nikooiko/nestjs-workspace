@@ -24,6 +24,7 @@ import { ApiAppUnauthorizedResponse } from '@app/core/api/decorators/api-app-una
 import { ApiAppBadRequestResponse } from '@app/core/api/decorators/api-app-bad-request-response.decorator';
 import { AuthUser } from '../decorators/auth-user.decorator';
 import { AuthGuard } from '../decorators/auth-guard.decorator';
+import { AUTH_COOKIE_NAME } from '../constants/auth-cookie-name.constant';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -75,6 +76,6 @@ export class AuthController {
   @ApiNoContentResponse()
   @AuthGuard()
   async logout(@Res({ passthrough: true }) res) {
-    res.clearCookie(this.config.accessToken.cookieName);
+    res.clearCookie(AUTH_COOKIE_NAME);
   }
 }
