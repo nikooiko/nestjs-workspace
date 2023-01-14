@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsEnum, IsString, IsUUID } from 'class-validator';
 import { Todo, TodoStatus } from '@app/todo/prisma-client';
 
-export class TodoDto implements Todo {
+export class TodoDto implements Partial<Todo> {
   @ApiProperty()
   @IsUUID()
   id: string;

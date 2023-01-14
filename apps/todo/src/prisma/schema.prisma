@@ -3,6 +3,7 @@
 
 generator client {
   provider = "prisma-client-js"
+  previewFeatures = ["extendedWhereUnique"]
   output   = "../../../../node_modules/@app/todo/prisma-client"
 }
 

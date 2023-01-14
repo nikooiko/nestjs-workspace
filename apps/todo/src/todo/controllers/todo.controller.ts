@@ -25,9 +25,13 @@ import { FindAllTodosQueryDto } from '../dto/find-all-todos-query.dto';
 import { TodosListDto } from '../dto/todos-list.dto';
 import { UUIDParam } from '@app/core/api/decorators/uuid-param.decorator';
 import { ApiAppNotFoundResponse } from '@app/core/api/decorators/api-app-not-found-response.decorator';
+import { AuthUser } from '../../auth/decorators/auth-user.decorator';
+import { AuthGuard } from '../../auth/decorators/auth-guard.decorator';
+import { UserDataDto } from '../../auth/dto/user-data.dto';
 
 @ApiTags('Todo')
 @Controller('todo')
+@AuthGuard()
 export class TodoController {
   constructor(private readonly todoService: TodoService) {}
 
@@ -37,9 +41,16 @@ export class TodoController {
     summary: 'Returns the list of Todos',
   })
   @ApiOkResponse({ type: TodosListDto })
-  async findAll(@Query() query: FindAllTodosQueryDto): Promise<TodosListDto> {
+  async findAll(
+    @AuthUser() user: UserDataDto,
+    @Query() query: FindAllTodosQueryDto,
+  ): Promise<TodosListDto> {
     const { limit, page } = query;
-    const { items, count } = await this.todoService.findAll({ page, limit });
+    const { items, count } = await this.todoService.findAll({
+      where: { ownerId: user.id },
+      take: limit,
+      skip: page * limit,
+    });
     return {
       limit,
       pages: Math.ceil(count / limit),
@@ -60,8 +71,11 @@ export class TodoController {
     type: TodoDto,
   })
   @ApiAppBadRequestResponse()
-  async create(@Body() data: CreateTodoDto): Promise<TodoDto> {
-    return this.todoService.create(data);
+  async create(
+    @AuthUser() user: UserDataDto,
+    @Body() data: CreateTodoDto,
+  ): Promise<TodoDto> {
+    return this.todoService.create({ ...data, ownerId: user.id });
   }
 
   @Patch(':id')
@@ -78,10 +92,11 @@ export class TodoController {
   @ApiAppNotFoundResponse()
   @ApiAppBadRequestResponse()
   async update(
+    @AuthUser() user: UserDataDto,
     @UUIDParam() id: string,
     @Body() data: UpdateTodoDto,
   ): Promise<TodoDto> {
-    return this.todoService.update(id, data);
+    return this.todoService.update({ ownerId: user.id, id }, data);
   }
 
   @Delete(':id')
@@ -92,7 +107,10 @@ export class TodoController {
   @ApiNoContentResponse()
   @ApiAppNotFoundResponse()
   @ApiAppBadRequestResponse()
-  async delete(@UUIDParam() id: string): Promise<void> {
-    return this.todoService.delete(id);
+  async delete(
+    @AuthUser() user: UserDataDto,
+    @UUIDParam() id: string,
+  ): Promise<void> {
+    return this.todoService.delete({ ownerId: user.id, id });
   }
 }
