@@ -4,6 +4,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { ConfigType } from '@nestjs/config';
 import { Request } from 'express';
 import authConfig from '../config/auth.config';
+import { UserDataDto } from '../dto/user-data.dto';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
@@ -18,12 +19,11 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  async validate(payload: any) {
-    return { userId: payload.sub, username: payload.username };
+  async validate(payload: UserDataDto) {
+    return payload;
   }
 
   extractJwtFromCookie(req: Request) {
-    console.log('here', req.cookies);
     return req.cookies[this.config.accessToken.cookieName];
   }
 }

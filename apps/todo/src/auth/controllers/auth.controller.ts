@@ -4,7 +4,6 @@ import {
   HttpCode,
   Inject,
   Post,
-  Req,
   Res,
   UseGuards,
 } from '@nestjs/common';
@@ -19,11 +18,12 @@ import { LocalAuthGuard } from '../guards/local-auth.guard';
 import { AuthService } from '../services/auth.service';
 import authConfig from '../config/auth.config';
 import { ConfigType } from '@nestjs/config';
-import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { RegisterDto } from '../dto/register.dto';
 import { LoginDto } from '../dto/login.dto';
 import { ApiAppUnauthorizedResponse } from '@app/core/api/decorators/api-app-unauthorized-response.decorator';
 import { ApiAppBadRequestResponse } from '@app/core/api/decorators/api-app-bad-request-response.decorator';
+import { AuthUser } from '../decorators/auth-user.decorator';
+import { AuthGuard } from '../decorators/auth-guard.decorator';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -46,17 +46,13 @@ export class AuthController {
   @ApiAppBadRequestResponse()
   async register(@Body() data: RegisterDto, @Res({ passthrough: true }) res) {
     const { accessToken } = await this.authService.register(data);
-    res.cookie(
-      this.config.accessToken.cookieName,
-      accessToken,
-      this.config.accessToken.options,
-    );
+    this.authService.setCookie(res, accessToken);
   }
 
   @Post('login')
   @HttpCode(204)
   @ApiOperation({
-    summary: 'Authenticates user.',
+    summary: 'Authenticates the user.',
   })
   @ApiBody({
     description: 'Credentials',
@@ -66,13 +62,9 @@ export class AuthController {
   @ApiAppUnauthorizedResponse()
   @ApiAppBadRequestResponse()
   @UseGuards(LocalAuthGuard)
-  async login(@Req() req, @Res({ passthrough: true }) res) {
-    const { accessToken } = await this.authService.login(req.user);
-    res.cookie(
-      this.config.accessToken.cookieName,
-      accessToken,
-      this.config.accessToken.options,
-    );
+  async login(@AuthUser() user, @Res({ passthrough: true }) res) {
+    const { accessToken } = await this.authService.login(user);
+    this.authService.setCookie(res, accessToken);
   }
 
   @Post('logout')
@@ -81,8 +73,8 @@ export class AuthController {
     summary: "Ends user's session.",
   })
   @ApiNoContentResponse()
-  @UseGuards(JwtAuthGuard)
-  async logout(@Req() req, @Res({ passthrough: true }) res) {
+  @AuthGuard()
+  async logout(@Res({ passthrough: true }) res) {
     res.clearCookie(this.config.accessToken.cookieName);
   }
 }

@@ -7,6 +7,7 @@ import { UsersService } from '../../users/services/users.service';
 import { RegisterDto } from '../dto/register.dto';
 import authConfig from '../config/auth.config';
 import { UserDataDto } from '../dto/user-data.dto';
+import { Response } from 'express';
 
 @Injectable()
 export class AuthService {
@@ -38,5 +39,13 @@ export class AuthService {
     return {
       accessToken: this.jwtService.sign(payload),
     };
+  }
+
+  setCookie(res: Response, accessToken: string) {
+    res.cookie(
+      this.config.accessToken.cookieName,
+      accessToken,
+      this.config.accessToken.options,
+    );
   }
 }
