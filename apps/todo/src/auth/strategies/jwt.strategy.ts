@@ -5,6 +5,7 @@ import { ConfigType } from '@nestjs/config';
 import { Request } from 'express';
 import authConfig from '../config/auth.config';
 import { UserDataDto } from '../dto/user-data.dto';
+import { AUTH_COOKIE_NAME } from '../constants/auth-cookie-name.constant';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
@@ -24,6 +25,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   extractJwtFromCookie(req: Request) {
-    return req.cookies[this.config.accessToken.cookieName];
+    return req.cookies[AUTH_COOKIE_NAME];
   }
 }

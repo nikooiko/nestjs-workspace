@@ -5,7 +5,6 @@ export const AUTH_CONFIG_KEY = 'auth';
 
 export default registerAs(AUTH_CONFIG_KEY, () => ({
   accessToken: {
-    cookieName: 'accessToken',
     secret: getEnvWithProdGuard('ACCESS_TOKEN_SECRET') || 'access-token-secret',
     options: {
       httpOnly: true,

@@ -8,6 +8,7 @@ import { RegisterDto } from '../dto/register.dto';
 import authConfig from '../config/auth.config';
 import { UserDataDto } from '../dto/user-data.dto';
 import { Response } from 'express';
+import { AUTH_COOKIE_NAME } from '../constants/auth-cookie-name.constant';
 
 @Injectable()
 export class AuthService {
@@ -42,10 +43,6 @@ export class AuthService {
   }
 
   setCookie(res: Response, accessToken: string) {
-    res.cookie(
-      this.config.accessToken.cookieName,
-      accessToken,
-      this.config.accessToken.options,
-    );
+    res.cookie(AUTH_COOKIE_NAME, accessToken, this.config.accessToken.options);
   }
 }
