@@ -1,7 +1,7 @@
 import { registerAs } from '@nestjs/config';
 import winston from 'winston';
-import { envToBoolean } from '@app/core/env/utils/env-to-boolean.util';
-import { envToNumber } from '@app/core/env/utils/env-to-number.util';
+import { envToBoolean } from '../../env/utils/env-to-boolean.util';
+import { envToNumber } from '../../env/utils/env-to-number.util';
 import { prettyConsoleFormatter } from '../utils/pretty-console-formatter.util';
 import { errorStackFormatter } from '../utils/error-stack-formatter.util';
 import { errorStackFormatterInline } from '../utils/error-stack-formatter-inline.util';

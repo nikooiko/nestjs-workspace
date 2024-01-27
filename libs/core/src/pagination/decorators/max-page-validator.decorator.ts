@@ -5,7 +5,7 @@ import {
 } from 'class-validator';
 
 export function MaxPage(max: number, validationOptions?: ValidationOptions) {
-  return function (object: unknown, propertyName: string) {
+  return function (object: any, propertyName: string) {
     registerDecorator({
       name: 'maxPage',
       target: object.constructor,

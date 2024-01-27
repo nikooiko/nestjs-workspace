@@ -7,7 +7,7 @@ export function PageParam(params: { default?: number; max?: number } = {}) {
   const extraDecorators = [];
   const defaultValue = params.default ?? 0;
   const min = 0;
-  if (Number.isFinite(params.max)) {
+  if (params.max !== undefined && Number.isFinite(params.max)) {
     extraDecorators.push(
       MaxPage(params.max, {
         message:

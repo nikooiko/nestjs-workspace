@@ -10,7 +10,7 @@ describe('check-production-env.util', () => {
     });
     it('should not throw if prop missing and not in production', () => {
       process.env.NODE_ENV = 'test';
-      expect(getEnvWithProdGuard('x')).toEqual(undefined);
+      expect(getEnvWithProdGuard('x')).toEqual('');
     });
     it('should should return env variable value', () => {
       process.env.NODE_ENV = 'test';

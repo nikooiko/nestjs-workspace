@@ -1,9 +1,9 @@
 import { Inject, Injectable, OnModuleDestroy } from '@nestjs/common';
 import Redis from 'ioredis';
 import { ConfigType } from '@nestjs/config';
-import redisConfig from './config/redis.config';
 import { Logger } from 'winston';
-import { LOGGER } from '@app/core/logger/factories/logger.factory';
+import redisConfig from '../config/redis.config';
+import { LOGGER } from '../../logger/factories/logger.factory';
 
 /**
  * This service should be used by modules that require direct access to ioredis client. The rest should use

@@ -4,7 +4,7 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { ValidationError } from 'class-validator';
-import { APP_VALIDATION_ERROR } from '@app/core/validation/constants/app-validation-error.constant';
+import { APP_VALIDATION_ERROR } from '../constants/app-validation-error.constant';
 
 @Injectable()
 export class AppValidationPipe extends ValidationPipe {

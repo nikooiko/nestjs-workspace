@@ -1,5 +1,5 @@
 import { Param, ParseUUIDPipe } from '@nestjs/common';
-import { AppBadRequestException } from '@app/core/api/exceptions/app-bad-request.exception';
+import { AppBadRequestException } from '../../error-handling/exceptions/app-bad-request.exception';
 
 export function UUIDParam(paramName = 'id'): ParameterDecorator {
   return Param(

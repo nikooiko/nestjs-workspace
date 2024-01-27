@@ -1,8 +1,9 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService, ConfigType } from '@nestjs/config';
 import { ClientProxyFactory, Transport } from '@nestjs/microservices';
+import { LoggerModule } from '../logger/logger.module';
 import redisConfig, { REDIS_CONFIG_KEY } from './config/redis.config';
-import { RedisService } from './redis.service';
+import { RedisService } from './services/redis.service';
 
 export const REDIS_MICROSERVICE_KEY = 'redis-microservice';
 
@@ -22,7 +23,7 @@ const redisMicroserviceFactory = {
 };
 
 @Module({
-  imports: [ConfigModule.forFeature(redisConfig)],
+  imports: [ConfigModule.forFeature(redisConfig), LoggerModule],
   providers: [redisMicroserviceFactory, RedisService],
   exports: [redisMicroserviceFactory, RedisService],
 })

@@ -9,5 +9,5 @@ export function getEnvWithProdGuard(key: string): string {
   if (process.env.NODE_ENV === 'production' && !value) {
     throw new Error(`⚠️ Missing ${key} at production environment! ⚠️`);
   }
-  return process.env[key];
+  return process.env[key] || '';
 }

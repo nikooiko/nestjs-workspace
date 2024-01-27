@@ -26,28 +26,30 @@ export class LogHttp implements NestMiddleware {
         statusCode,
         responseTime: Date.now() - start,
       };
-      ['body', 'query', 'cookies'].forEach((field) => {
-        const fieldConfig = httpConfig[field];
-        const value = req[field];
-        if (
-          !fieldConfig.enabled ||
-          !value ||
-          !Object.keys(value).length ||
-          JSON.stringify(value).length > httpConfig[field].maxSize
-        ) {
-          return;
-        }
-        if (fieldConfig.blackListedFields) {
-          // need to filter the output, so swallow copy the original value to avoid messing with input object
-          const copy = { ...value };
-          fieldConfig.blackListedFields.forEach(
-            (fieldName) => delete copy[fieldName],
-          );
-          meta[field] = copy;
-        } else {
-          meta[field] = value;
-        }
-      });
+      ['body', 'query', 'cookies'].forEach(
+        (field: 'body' | 'query' | 'cookies') => {
+          const fieldConfig = httpConfig[field];
+          const value = req[field];
+          if (
+            !fieldConfig.enabled ||
+            !value ||
+            !Object.keys(value).length ||
+            JSON.stringify(value).length > (httpConfig[field].maxSize ?? 0)
+          ) {
+            return;
+          }
+          if (fieldConfig.hasOwnProperty('blackListedFields')) {
+            // need to filter the output, so swallow copy the original value to avoid messing with input object
+            const copy = { ...value };
+            (fieldConfig as any).blackListedFields.forEach(
+              (fieldName: string) => delete copy[fieldName],
+            );
+            meta[field] = copy;
+          } else {
+            meta[field] = value;
+          }
+        },
+      );
       this.logger.http(`${method} ${url} finished with ${statusCode}`, meta);
     });
     next();

@@ -1,5 +1,5 @@
 import { registerAs } from '@nestjs/config';
-import { envToNumber } from '@app/core/env/utils/env-to-number.util';
+import { envToNumber } from '../../env/utils/env-to-number.util';
 
 export const REDIS_CONFIG_KEY = 'redis';
 

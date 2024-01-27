@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { APP_PIPE } from '@nestjs/core';
-import { AppValidationPipe } from '@app/core/validation/pipes/app-validation.pipe';
+import { AppValidationPipe } from './pipes/app-validation.pipe';
 
 @Module({
   providers: [

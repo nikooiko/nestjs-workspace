@@ -1,14 +1,14 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService, ConfigType } from '@nestjs/config';
 import { ThrottlerModule } from '@nestjs/throttler';
-import { RedisModule } from '@app/core/redis/redis.module';
+import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerStorageRedisService } from 'nestjs-throttler-storage-redis';
-import { RedisService } from '@app/core/redis/redis.service';
 import rateLimitConfig, {
   RATE_LIMIT_CONFIG_KEY,
 } from './config/rate-limit.config';
-import { APP_GUARD } from '@nestjs/core';
-import { ThrottlerBehindProxyGuard } from '@app/core/rate-limit/guards/throttler-behind-proxy.guard';
+import { ThrottlerBehindProxyGuard } from './guards/throttler-behind-proxy.guard';
+import { RedisModule } from '../redis/redis.module';
+import { RedisService } from '../redis/services/redis.service';
 
 @Module({
   imports: [
@@ -24,6 +24,9 @@ import { ThrottlerBehindProxyGuard } from '@app/core/rate-limit/guards/throttler
         const config = configService.get<ConfigType<typeof rateLimitConfig>>(
           RATE_LIMIT_CONFIG_KEY,
         );
+        if (!config) {
+          throw new Error('Rate limit configuration is not defined');
+        }
         return {
           ttl: config.ttl,
           limit: config.limit,

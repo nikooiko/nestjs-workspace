@@ -1,8 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { RedisService } from './redis.service';
-import redisConfig from './config/redis.config';
+import redisConfig from '../config/redis.config';
+import { LoggerModule } from '../../logger/logger.module';
 import { ConfigModule } from '@nestjs/config';
-import { LoggerModule } from '@app/core/logger/logger.module';
 
 describe('RedisService', () => {
   let service: RedisService;
