@@ -4,7 +4,7 @@ import { AppUnauthorizedException } from '@app/core/error-handling/exceptions/ap
 
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') {
-  handleRequest(err, user) {
+  handleRequest(err: Error, user: any) {
     if (err || !user) {
       throw err || new AppUnauthorizedException();
     }

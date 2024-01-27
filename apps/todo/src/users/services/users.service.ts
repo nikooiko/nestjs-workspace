@@ -17,7 +17,7 @@ export class UsersService {
   ) {}
 
   async findOne(where: Prisma.UserWhereInput): Promise<User> {
-    return this.prisma.user.findFirst({
+    return this.prisma.user.findFirstOrThrow({
       where,
     });
   }

@@ -19,6 +19,9 @@ import { UsersModule } from '../users/users.module';
       useFactory: (configService: ConfigService) => {
         const config =
           configService.get<ConfigType<typeof authConfig>>(AUTH_CONFIG_KEY);
+        if (!config) {
+          throw new Error('Auth configuration is not defined');
+        }
         return { secret: config.accessToken.secret };
       },
       inject: [ConfigService],

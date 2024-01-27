@@ -25,6 +25,8 @@ import { ApiAppBadRequestResponse } from '@app/core/error-handling/decorators/ap
 import { AuthUser } from '../decorators/auth-user.decorator';
 import { AuthGuard } from '../decorators/auth-guard.decorator';
 import { AUTH_COOKIE_NAME } from '../constants/auth-cookie-name.constant';
+import { Response } from 'express';
+import { UserDataDto } from '../dto/user-data.dto';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -45,7 +47,10 @@ export class AuthController {
   })
   @ApiCreatedResponse()
   @ApiAppBadRequestResponse()
-  async register(@Body() data: RegisterDto, @Res({ passthrough: true }) res) {
+  async register(
+    @Body() data: RegisterDto,
+    @Res({ passthrough: true }) res: Response,
+  ) {
     const { accessToken } = await this.authService.register(data);
     this.authService.setCookie(res, accessToken);
   }
@@ -63,7 +68,10 @@ export class AuthController {
   @ApiAppUnauthorizedResponse()
   @ApiAppBadRequestResponse()
   @UseGuards(LocalAuthGuard)
-  async login(@AuthUser() user, @Res({ passthrough: true }) res) {
+  async login(
+    @AuthUser() user: UserDataDto,
+    @Res({ passthrough: true }) res: Response,
+  ) {
     const { accessToken } = await this.authService.login(user);
     this.authService.setCookie(res, accessToken);
   }
@@ -75,7 +83,7 @@ export class AuthController {
   })
   @ApiNoContentResponse()
   @AuthGuard()
-  async logout(@Res({ passthrough: true }) res) {
+  async logout(@Res({ passthrough: true }) res: Response) {
     res.clearCookie(AUTH_COOKIE_NAME);
   }
 }
