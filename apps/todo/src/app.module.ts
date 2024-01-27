@@ -11,12 +11,14 @@ import { RateLimitModule } from '@app/core/rate-limit/rate-limit.module';
 import { TodoModule } from './todo/todo.module';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
+import { ErrorHandlingModule } from '@app/core/error-handling/error-handling.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot(),
     LoggerModule /* global */,
     SecurityModule /* must be imported before other modules as it applies some security-related middleware */,
+    ErrorHandlingModule,
     RateLimitModule,
     ValidationModule,
     CookiesModule,

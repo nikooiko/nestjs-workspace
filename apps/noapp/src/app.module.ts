@@ -7,11 +7,13 @@ import { RedisModule } from '@app/core/redis/redis.module';
 import { LOGGER } from '@app/core/logger/factories/logger.factory';
 import { AppController } from './app.controller';
 import { ValidationModule } from '@app/core/validation/validation.module';
+import { ErrorHandlingModule } from '@app/core/error-handling/error-handling.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot(),
     LoggerModule /* global */,
+    ErrorHandlingModule,
     ValidationModule,
     CookiesModule,
     RedisModule,

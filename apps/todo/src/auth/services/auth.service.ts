@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigType } from '@nestjs/config';
-import { AppBadRequestException } from '@app/core/api/exceptions/app-bad-request.exception';
+import { AppBadRequestException } from '@app/core/error-handling/exceptions/app-bad-request.exception';
 import { User } from '@app/todo/prisma-client';
 import { UsersService } from '../../users/services/users.service';
 import { RegisterDto } from '../dto/register.dto';

@@ -3,9 +3,9 @@ import { BaseExceptionFilter } from '@nestjs/core';
 import { Logger } from 'winston';
 import { Prisma } from '@app/todo/prisma-client';
 import { LOGGER } from '@app/core/logger/factories/logger.factory';
-import { AppInternalServerErrorException } from '@app/core/api/exceptions/app-internal-server-error.exception';
-import { AppNotFoundException } from '@app/core/api/exceptions/app-not-found.exception';
-import { AppBadRequestException } from '@app/core/api/exceptions/app-bad-request.exception';
+import { AppInternalServerErrorException } from '@app/core/error-handling/exceptions/app-internal-server-error.exception';
+import { AppNotFoundException } from '@app/core/error-handling/exceptions/app-not-found.exception';
+import { AppBadRequestException } from '@app/core/error-handling/exceptions/app-bad-request.exception';
 
 @Catch(Prisma.PrismaClientKnownRequestError, Prisma.NotFoundError)
 export class PrismaExceptionsFilter extends BaseExceptionFilter {

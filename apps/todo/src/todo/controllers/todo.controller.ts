@@ -16,7 +16,7 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import { ApiAppBadRequestResponse } from '@app/core/api/decorators/api-app-bad-request-response.decorator';
+import { ApiAppBadRequestResponse } from '@app/core/error-handling/decorators/api-app-bad-request-response.decorator';
 import { TodoDto } from '../dto/todo.dto';
 import { CreateTodoDto } from '../dto/create-todo.dto';
 import { UpdateTodoDto } from '../dto/update-todo.dto';
@@ -24,7 +24,7 @@ import { TodoService } from '../services/todo.service';
 import { FindAllTodosQueryDto } from '../dto/find-all-todos-query.dto';
 import { TodosListDto } from '../dto/todos-list.dto';
 import { UUIDParam } from '@app/core/api/decorators/uuid-param.decorator';
-import { ApiAppNotFoundResponse } from '@app/core/api/decorators/api-app-not-found-response.decorator';
+import { ApiAppNotFoundResponse } from '@app/core/error-handling/decorators/api-app-not-found-response.decorator';
 import { AuthUser } from '../../auth/decorators/auth-user.decorator';
 import { AuthGuard } from '../../auth/decorators/auth-guard.decorator';
 import { UserDataDto } from '../../auth/dto/user-data.dto';

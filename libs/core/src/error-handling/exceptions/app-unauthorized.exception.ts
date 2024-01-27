@@ -1,12 +1,6 @@
-import { AppValidationError } from '@app/core/validation/types/AppValidationError';
 import { HttpStatus, UnauthorizedException } from '@nestjs/common';
-import {
-  ApiExtraModels,
-  ApiProperty,
-  ApiPropertyOptional,
-} from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
-@ApiExtraModels(AppValidationError)
 export class AppUnauthorizedException extends UnauthorizedException {
   static DESC_DEFAULT = 'Unauthorized';
   static ERROR_DEFAULT = 'unauthorized';

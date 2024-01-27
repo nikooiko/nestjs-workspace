@@ -1,4 +1,3 @@
-import { AppValidationError } from '@app/core/validation/types/AppValidationError';
 import { BadRequestException, HttpStatus } from '@nestjs/common';
 import {
   ApiExtraModels,
@@ -6,7 +5,8 @@ import {
   ApiPropertyOptional,
   getSchemaPath,
 } from '@nestjs/swagger';
-import { APP_VALIDATION_ERROR } from '@app/core/validation/constants/app-validation-error.constant';
+import { AppValidationError } from '../../validation/types/AppValidationError';
+import { APP_VALIDATION_ERROR } from '../../validation/constants/app-validation-error.constant';
 
 @ApiExtraModels(AppValidationError)
 export class AppBadRequestException extends BadRequestException {
