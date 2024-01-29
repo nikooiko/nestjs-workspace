@@ -8,6 +8,7 @@ import { LOGGER } from '@app/core/logger/factories/logger.factory';
 import { AppController } from './app.controller';
 import { ValidationModule } from '@app/core/validation/validation.module';
 import { ErrorHandlingModule } from '@app/core/error-handling/error-handling.module';
+import { PrometheusModule } from '@app/core/prometheus/prometheus.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { ErrorHandlingModule } from '@app/core/error-handling/error-handling.mod
     ValidationModule,
     CookiesModule,
     RedisModule,
+    PrometheusModule,
   ],
   controllers: [AppController],
   providers: [],
