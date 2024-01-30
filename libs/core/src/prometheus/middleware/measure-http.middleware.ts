@@ -1,10 +1,11 @@
 import { Injectable, NestMiddleware } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { PrometheusService } from '@app/core/prometheus/services/prometheus.service';
+import { Counter } from 'prom-client';
 
 @Injectable()
 export class MeasureHttp implements NestMiddleware {
-  httpRequests: any;
+  httpRequests: Counter;
 
   constructor(private prometheus: PrometheusService) {
     this.httpRequests = this.prometheus.createCounter({
