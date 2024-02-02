@@ -1,25 +1,42 @@
-import { Injectable, NestMiddleware } from '@nestjs/common';
+import { Inject, Injectable, NestMiddleware } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { PrometheusService } from '@app/core/prometheus/services/prometheus.service';
-import { Counter } from 'prom-client';
+import { Histogram } from 'prom-client';
+import prometheusConfig from '@app/core/prometheus/config/prometheus.config';
+import { ConfigType } from '@nestjs/config';
 
 @Injectable()
 export class MeasureHttp implements NestMiddleware {
-  httpRequests: Counter;
+  httpRequests: Histogram;
 
-  constructor(private prometheus: PrometheusService) {
-    this.httpRequests = this.prometheus.createCounter({
+  constructor(
+    @Inject(prometheusConfig.KEY)
+    private readonly config: ConfigType<typeof prometheusConfig>,
+    private readonly prometheus: PrometheusService,
+  ) {
+    this.httpRequests = this.prometheus.createHistogram({
       help: 'Tracks HTTP requests',
       name: 'http_requests',
-      labelNames: ['method', 'url', 'statusCode'],
+      labelNames: ['method', 'path', 'statusCode'],
+      buckets: this.config.httpDurationBuckets,
     });
   }
 
   use(req: Request, res: Response, next: () => void) {
+    const start = Date.now();
     res.once('finish', () => {
-      const { method, url } = req;
+      const { method, route } = req;
       const { statusCode } = res;
-      this.httpRequests.inc({ method, url, statusCode });
+      const duration = (Date.now() - start) / 1000;
+      this.httpRequests.observe(
+        {
+          method,
+          // utilizes route path instead of req.path to make sure is static (ie not affected by param values), the goal is to minimize cardinality
+          path: route?.path || 'unmatched',
+          statusCode,
+        },
+        duration,
+      );
     });
     next();
   }

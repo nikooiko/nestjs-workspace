@@ -4,6 +4,8 @@ import client, {
   CounterConfiguration,
   Gauge,
   GaugeConfiguration,
+  Histogram,
+  HistogramConfiguration,
 } from 'prom-client';
 
 @Injectable()
@@ -18,5 +20,13 @@ export class PrometheusService {
 
   createGauge<T extends string>(opts: GaugeConfiguration<T>) {
     return new Gauge(opts);
+  }
+
+  createHistogram<T extends string>(opts: HistogramConfiguration<T>) {
+    return new Histogram(opts);
+  }
+
+  clearAll() {
+    client.register.clear();
   }
 }

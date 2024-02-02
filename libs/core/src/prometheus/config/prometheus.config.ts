@@ -9,4 +9,5 @@ export default registerAs(PROMETHEUS_CONFIG_KEY, () => ({
     false,
   ),
   enableHttpMetrics: envToBoolean('PROMETHEUS_HTTP_METRICS_ENABLED', true),
+  httpDurationBuckets: [0.05, 0.1, 0.3, 0.7, 1, 2, 5, 10],
 }));
