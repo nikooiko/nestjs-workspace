@@ -26,6 +26,7 @@
   "dependencies": {
     "@azure/identity": "^3.0.0",
     "@azure/storage-blob": "^12.11.0",
+    "@elastic/elasticsearch": "^8.13.1",
     "@nestjs/bull": "^0.6.2",
     "@nestjs/common": "^9.0.0",
     "@nestjs/config": "^2.2.0",
