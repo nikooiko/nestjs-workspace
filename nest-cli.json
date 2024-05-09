@@ -44,6 +44,15 @@
       "compilerOptions": {
         "tsConfigPath": "apps/tasks/tsconfig.app.json"
       }
+    },
+    "cats": {
+      "type": "application",
+      "root": "apps/cats",
+      "entryFile": "main",
+      "sourceRoot": "apps/cats/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/cats/tsconfig.app.json"
+      }
     }
   }
 }
