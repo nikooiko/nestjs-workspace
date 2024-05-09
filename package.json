@@ -108,7 +108,8 @@
       "<rootDir>/apps/"
     ],
     "moduleNameMapper": {
-      "^@app/core(|/.*)$": "<rootDir>/libs/core/src/$1"
+      "^@app/core(|/.*)$": "<rootDir>/libs/core/src/$1",
+      "^@app/testing(|/.*)$": "<rootDir>/libs/testing/src/$1"
     }
   }
 }
