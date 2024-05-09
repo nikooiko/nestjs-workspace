@@ -106,6 +106,7 @@ export class ElasticSearchService extends Client {
         });
         this.logger.debug('Bulk upsert entry failed', {
           type: 'ES_UPSERT_ENTRIES_FAILURE',
+          index,
           error: action[operation]?.error,
           data: data[i],
         });
@@ -118,6 +119,7 @@ export class ElasticSearchService extends Client {
     const count = successful.length;
     this.logger.info('Bulk upsert entries', {
       type: 'ES_UPSERT_ENTRIES',
+      index,
       count,
     });
     return {
@@ -137,12 +139,14 @@ export class ElasticSearchService extends Client {
         if (err.meta.statusCode === 404) {
           this.logger.warn('Entry not found', {
             type: 'ES_ENTRY_NOT_FOUND',
+            index,
             id,
           });
           throw new AppNotFoundException();
         } else if (err.meta.statusCode && err.meta.statusCode < 500) {
           this.logger.error('Failed to delete entry', {
             type: 'ES_DELETE_ENTRY_ERROR',
+            index,
             id,
             err,
           });
@@ -151,7 +155,7 @@ export class ElasticSearchService extends Client {
       }
       throw err;
     }
-    this.logger.info('Deleted entry', { type: 'ES_DELETE_ENTRY', id });
+    this.logger.info('Deleted entry', { type: 'ES_DELETE_ENTRY', index, id });
   }
 
   async deleteDocBulk(
@@ -180,17 +184,36 @@ export class ElasticSearchService extends Client {
     if (failed.length) {
       this.logger.warn('Bulk delete entries failures', {
         type: 'ES_DELETE_ENTRIES_FAILURES',
+        index,
         failed,
       });
     }
     const count = successful.length;
     this.logger.info('Deleted entries', {
       type: 'ES_DELETE_ENTRIES',
+      index,
       count,
     });
     return {
       successful,
       failed,
     };
+  }
+
+  /**
+   * Normalizes input text to be used in search. It removes any character that might mess with the search query
+   * (check https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html#_reserved_characters)
+   * and removes any unneeded whitespace.
+   * @param {string} inputText
+   * @returns {string}
+   */
+  static normalizeInputText(inputText: string): string {
+    return inputText
+      .replace(/[+\-|!(){}^"'`~*?:\\\/;@=#<>\[\]]+/g, '') // remove various special characters
+      .replace(/&/g, '\\&') // escape '&' character e.g. R&&&D -> R\\&\\&\\&D
+      .replace(/\/+/g, ' ') // replace various special characters with space
+      .replace(/\s+/g, ' ') // replace multiple spaces with a single one
+      .trim()
+      .toLowerCase(); // make everything lowercase to assure that no operators are included in the term (e.g. AND, OR)
   }
 }

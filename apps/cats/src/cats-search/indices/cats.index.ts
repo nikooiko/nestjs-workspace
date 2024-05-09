@@ -6,10 +6,18 @@ export const catsIndex: IndicesCreateRequest = {
     dynamic: 'strict',
     properties: {
       created_at: { type: 'date' },
-      name: { type: 'text', analyzer: 'english' },
+      name: {
+        type: 'text',
+        analyzer: 'english',
+        fields: { raw: { type: 'keyword' } },
+      },
       age: { type: 'integer' },
       gender: { type: 'keyword' },
-      colors: { type: 'text', analyzer: 'english' },
+      colors: {
+        type: 'text',
+        analyzer: 'english',
+        fields: { raw: { type: 'keyword' } },
+      },
     },
   },
 };

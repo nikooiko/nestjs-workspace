@@ -3,7 +3,9 @@ import { ElasticModule } from '@app/core/elastic/elastic.module';
 import { LOGGER } from '@app/core/logger/factories/logger.factory';
 import { Logger } from 'winston';
 import { ElasticSearchService } from '@app/core/elastic/services/elastic-search.service';
-import { catsIndex } from './indeces/cats.index';
+import { catsIndex } from './indices/cats.index';
+import { CatsSearchController } from './controllers/cats-search.controller';
+import { CatsSearchService } from './services/cats-search.service';
 
 const cats = [
   {
@@ -52,6 +54,8 @@ const cats = [
 
 @Module({
   imports: [ElasticModule],
+  controllers: [CatsSearchController],
+  providers: [CatsSearchService],
 })
 export class CatsSearchModule implements OnApplicationBootstrap {
   constructor(
@@ -61,22 +65,35 @@ export class CatsSearchModule implements OnApplicationBootstrap {
 
   async onApplicationBootstrap() {
     await this.es.checkOrCreateIndex(catsIndex); // always resolves
+    // clear everything
+    await this.es.deleteByQuery({
+      index: catsIndex.index,
+      query: { match_all: {} },
+    });
+
+    // add one
     await this.es.upsertDoc(catsIndex.index, {
-      id: cats[0].name,
+      id: cats[0].name.toLowerCase(),
       document: cats[0],
     });
-    await this.es.deleteDoc(catsIndex.index, cats[0].name);
+
+    // remove one
+    await this.es.deleteDoc(catsIndex.index, cats[0].name.toLowerCase());
+
+    // add and remove everything
     await this.es.upsertDocBulk(
       catsIndex.index,
-      cats.map((c) => ({ id: c.name, document: c })),
+      cats.map((c) => ({ id: c.name.toLowerCase(), document: c })),
     );
     await this.es.deleteDocBulk(
       catsIndex.index,
-      cats.map((c) => c.name),
+      cats.map((c) => c.name.toLowerCase()),
     );
+
+    // add everything again
     await this.es.upsertDocBulk(
       catsIndex.index,
-      cats.map((c) => ({ id: c.name, document: c })),
+      cats.map((c) => ({ id: c.name.toLowerCase(), document: c })),
     );
     this.logger.info('Cats bootstrap success!', {
       type: 'CATS_BOOTSTRAP',
