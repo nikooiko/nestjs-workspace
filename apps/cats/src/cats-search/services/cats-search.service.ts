@@ -31,9 +31,9 @@ export class CatsSearchService {
     const must: QueryDslQueryContainer[] = [];
     if (q) {
       must.push({
-        multi_match: {
-          query: q,
-          fields: ['name', 'colors'],
+        query_string: {
+          query: ElasticSearchService.createQSInput(q),
+          fields: ['name^2', 'colors^0.3'],
         },
       });
     }
@@ -64,6 +64,7 @@ export class CatsSearchService {
         },
       });
     }
+
     const request: SearchRequest = {
       index: catsIndex.index,
       query: {
@@ -73,7 +74,10 @@ export class CatsSearchService {
         },
       },
       sort: CatsSearchService.orderByToSearch(orderBy),
-      aggregations: CatsSearchService.facetsToSearch(facets),
+      aggregations: ElasticSearchService.facetsToSearch(
+        CatsSearchService.facetsMap,
+        facets,
+      ),
       from: page * limit,
       size: limit,
       rest_total_hits_as_int: false,
@@ -106,7 +110,7 @@ export class CatsSearchService {
 
   /**
    * Utility that converts incoming query "order by" to search format
-   * @param {SearchCatsOrderBy} [orderBy]
+   * @param [orderBy]
    */
   static orderByToSearch(orderBy?: SearchCatsOrderBy): Sort {
     switch (orderBy) {
@@ -133,28 +137,4 @@ export class CatsSearchService {
         terms: { field: 'colors.raw' },
       },
     };
-
-  /**
-   * Utility that converts requested facets to ES aggregations.
-   * @param {SearchCatsFacet} facets
-   */
-  static facetsToSearch(
-    facets?: SearchCatsFacet[],
-  ): Record<string, AggregationsAggregationContainer> | undefined {
-    if (!facets) {
-      return;
-    }
-    return facets.reduce(
-      (
-        aggs: Record<string, AggregationsAggregationContainer>,
-        facet: SearchCatsFacet,
-      ) => {
-        if (CatsSearchService.facetsMap[facet]) {
-          aggs[facet] = CatsSearchService.facetsMap[facet];
-        }
-        return aggs;
-      },
-      {},
-    );
-  }
 }

@@ -3,6 +3,7 @@ import { Client } from '@elastic/elasticsearch';
 import { ConfigType } from '@nestjs/config';
 import elasticConfig from '../config/elastic.config';
 import {
+  AggregationsAggregationContainer,
   BulkOperationType,
   IndicesCreateRequest,
 } from '@elastic/elasticsearch/lib/api/types';
@@ -208,13 +209,12 @@ export class ElasticSearchService extends Client {
   }
 
   /**
-   * Normalizes input text to be used in search. It removes any character that might mess with the search query
+   * Normalizes input text to be used in query_string based search. It removes any character that might mess with the
+   * search query and removes any unneeded whitespace.
    * (check https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html#_reserved_characters)
-   * and removes any unneeded whitespace.
-   * @param {string} inputText
-   * @returns {string}
+   * @param inputText
    */
-  static normalizeInputText(inputText: string): string {
+  static normalizeQSInput(inputText: string): string {
     return inputText
       .replace(/[+\-|!(){}^"'`~*?:\\\/;@=#<>\[\]]+/g, '') // remove various special characters
       .replace(/&/g, '\\&') // escape '&' character e.g. R&&&D -> R\\&\\&\\&D
@@ -222,5 +222,80 @@ export class ElasticSearchService extends Client {
       .replace(/\s+/g, ' ') // replace multiple spaces with a single one
       .trim()
       .toLowerCase(); // make everything lowercase to assure that no operators are included in the term (e.g. AND, OR)
+  }
+
+  /**
+   * Transforms incoming input text to a query_string (more details at https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html)
+   * that is suitable for search.
+   * It tries to match as many entries as possible but favors "exact" matches over "fuzzy" ones (word matching, contains matching).
+   * It utilizes term boosting to favor more explicit matches over generic ones
+   * https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html#_boosting
+   *
+   * The match types are categorized like this (higher boost means more important):
+   * - Any lexical word matching: "blacks" (matches "black") or "golden" (boost: 2) (rule #1)
+   * - Any part matching: "hor" (matches "thor") or "odi" (matches "odin") (no boost) (applied only to words with at least 3 letters) (rule #2)
+   * - Any fuzzy words matching: "freyjja" (matches "freyja") (boost: 0.5) (rule #3) (applied only to words with at least 4 letters)
+   *
+   * @param inputText
+   */
+  static createQSInput(inputText: string): string {
+    const normalizedInputText =
+      ElasticSearchService.normalizeQSInput(inputText);
+    const words = normalizedInputText.split(' ');
+    if (!words.length) {
+      // do nothing with empty search
+      return '*';
+    }
+    const items: string[] = [];
+
+    // rule #1
+    const anyLexicalWordMatching = `(${words.join(' OR ')})^2`;
+    items.push(anyLexicalWordMatching);
+
+    // rule #2
+    const containsWordList = words
+      .filter((word) => word.length >= 3)
+      .map((word) => `/.*${word}.*/`);
+    if (containsWordList.length) {
+      const anyContainsWordMatching = `(${containsWordList.join(' OR ')})`;
+      items.push(anyContainsWordMatching);
+    }
+
+    // rule #3
+    const fuzzyWords = words.filter((word) => word.length >= 4);
+    if (fuzzyWords.length) {
+      const fuzzyWordMatching = `(${fuzzyWords
+        .map((word) => `${word}~`)
+        .join(' OR ')})^0.5`;
+      items.push(fuzzyWordMatching);
+    }
+
+    return items.join(' OR ');
+  }
+
+  /**
+   * Utility that converts requested facets to ES aggregations.
+   * @param facetsMap
+   * @param [facets]
+   */
+  static facetsToSearch(
+    facetsMap: Record<string, AggregationsAggregationContainer>,
+    facets?: string[],
+  ): Record<string, AggregationsAggregationContainer> | undefined {
+    if (!facets) {
+      return;
+    }
+    return facets.reduce(
+      (
+        aggs: Record<string, AggregationsAggregationContainer>,
+        facet: string,
+      ) => {
+        if (facetsMap[facet]) {
+          aggs[facet] = facetsMap[facet];
+        }
+        return aggs;
+      },
+      {},
+    );
   }
 }

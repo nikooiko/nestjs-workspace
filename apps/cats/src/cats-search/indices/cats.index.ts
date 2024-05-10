@@ -20,4 +20,15 @@ export const catsIndex: IndicesCreateRequest = {
       },
     },
   },
+  settings: {
+    index: {
+      similarity: {
+        default: {
+          type: 'BM25',
+          b: 0, // the size of the document doesn't affect the scoring
+          k1: 0, // multiple matches of the same word don't affect the scoring
+        },
+      },
+    },
+  },
 };
