@@ -88,7 +88,7 @@ export class ElasticSearchService extends Client {
       { index: { _index: index, _id: datum.id } },
       datum.document,
     ]);
-    const bulkResponse = await this.bulk<T>({ refresh: true, operations });
+    const bulkResponse = await this.bulk<T>({ operations });
     const successful: { id: string }[] = [];
     const failed: { id: string; retry: boolean }[] = [];
     // The items array has the same order of the dataset we just indexed.
@@ -116,6 +116,13 @@ export class ElasticSearchService extends Client {
         });
       }
     });
+    if (failed.length) {
+      this.logger.warn('Bulk upsert entries failures', {
+        type: 'ES_UPSERT_ENTRIES_FAILURES',
+        index,
+        failed,
+      });
+    }
     const count = successful.length;
     this.logger.info('Bulk upsert entries', {
       type: 'ES_UPSERT_ENTRIES',
@@ -165,7 +172,7 @@ export class ElasticSearchService extends Client {
     const operations = ids.map((id) => ({
       delete: { _index: index, _id: id },
     }));
-    const bulkResponse = await this.bulk({ refresh: true, operations });
+    const bulkResponse = await this.bulk({ operations });
     const successful: { id: string }[] = [];
     const failed: { id: string }[] = [];
     // The items array has the same order of the operations.
