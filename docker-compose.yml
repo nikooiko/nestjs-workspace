@@ -20,6 +20,54 @@ services:
     networks:
       app_net:
 
+  zookeeper:
+    container_name: zookeeper
+    image: zookeeper:3.7.2
+    ports:
+    - "2181:2181"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    networks:
+      app_net:
+    volumes:
+    - zookeeperdata:/data
+
+  kafka:
+    image: confluentinc/cp-kafka:7.6.1
+    depends_on:
+    - zookeeper
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9093,EXTERNAL://localhost:9092
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,EXTERNAL:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_LISTENERS: PLAINTEXT://:9093,EXTERNAL://:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+    ports:
+    - "9092:9092"
+    - "9093:9093"
+    volumes:
+    - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      app_net:
+  kafka-ui:
+    image: provectuslabs/kafka-ui
+    depends_on:
+    - kafka
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9093
+      KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
+    ports:
+    - "9085:8080"
+    networks:
+      app_net:
+
   essetup:
     image: docker.elastic.co/elasticsearch/elasticsearch:${STACK_VERSION}
     volumes:
@@ -71,7 +119,6 @@ services:
       interval: 1s
       timeout: 5s
       retries: 120
-
   elasticsearch:
     depends_on:
       essetup:
@@ -111,7 +158,6 @@ services:
       interval: 10s
       timeout: 10s
       retries: 120
-
   kibana:
     depends_on:
       elasticsearch:
@@ -144,6 +190,7 @@ volumes:
   certs:
   esdata:
   kibanadata:
+  zookeeperdata:
 
 networks:
   app_net:
