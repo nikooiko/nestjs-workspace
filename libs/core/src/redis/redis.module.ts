@@ -4,6 +4,7 @@ import { ClientProxyFactory, Transport } from '@nestjs/microservices';
 import { LoggerModule } from '../logger/logger.module';
 import redisConfig, { REDIS_CONFIG_KEY } from './config/redis.config';
 import { RedisService } from './services/redis.service';
+import { RedisCountSemaphoreService } from '@app/core/redis/services/redis-count-semaphore.service';
 
 export const REDIS_MICROSERVICE_KEY = 'redis-microservice';
 
@@ -24,7 +25,11 @@ const redisMicroserviceFactory = {
 
 @Module({
   imports: [ConfigModule.forFeature(redisConfig), LoggerModule],
-  providers: [redisMicroserviceFactory, RedisService],
-  exports: [redisMicroserviceFactory, RedisService],
+  providers: [
+    redisMicroserviceFactory,
+    RedisService,
+    RedisCountSemaphoreService,
+  ],
+  exports: [redisMicroserviceFactory, RedisService, RedisCountSemaphoreService],
 })
 export class RedisModule {}
