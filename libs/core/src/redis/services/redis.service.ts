@@ -101,7 +101,7 @@ export class RedisService extends Redis implements OnModuleDestroy {
       local ttl = ARGV[2]
       local current = tonumber(redis.call("GET", key) or "0")
       if current >= limit then
-        return -1;
+        return -1
       end
       current = current + 1
       redis.call("SET", key, current)
