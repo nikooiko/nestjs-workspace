@@ -4,5 +4,5 @@ export const KafkaRateLimitOptions = Reflector.createDecorator<{
   key: string;
   limit: number;
   pauseDurationMs: number;
-  ttl: number;
+  ttlMs: number;
 }>();

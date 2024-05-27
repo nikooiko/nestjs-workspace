@@ -10,6 +10,7 @@ import {
 import { KafkaService } from './services/kafka.service';
 import { KAFKA_OPTIONS } from './constants/kafka-options.constant';
 import { KAFKA_CLIENT } from './constants/kafka-client.constant';
+import { RedisModule } from '@app/core/redis/redis.module';
 
 @Module({})
 export class KafkaModule {
@@ -32,7 +33,11 @@ export class KafkaModule {
     };
     return {
       module: KafkaModule,
-      imports: [ClientsModule, ConfigModule.forFeature(kafkaConfig)],
+      imports: [
+        ClientsModule,
+        ConfigModule.forFeature(kafkaConfig),
+        RedisModule,
+      ],
       providers: [KafkaService, topicsProvider, kafkaMicroserviceFactory],
       exports: [KafkaService, kafkaMicroserviceFactory],
     };
