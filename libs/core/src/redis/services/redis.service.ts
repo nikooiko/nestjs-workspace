@@ -70,7 +70,7 @@ export class RedisService extends Redis implements OnModuleDestroy {
     key: string,
     current: string,
     next: string,
-    ttl: number,
+    ttl?: number,
   ): Promise<boolean> {
     const casLua = `     
       local key = KEYS[1]
@@ -88,9 +88,10 @@ export class RedisService extends Redis implements OnModuleDestroy {
           redis.call("PEXPIRE", key, ttl)
         end
       end
+     
       return 1
     `;
-    const res = await this.eval(casLua, 1, key, current, next, ttl);
+    const res = await this.eval(casLua, 1, key, current, next, ttl ?? '');
     return res === 1;
   }
 
