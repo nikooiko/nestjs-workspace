@@ -14,7 +14,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     public readonly config: ConfigType<typeof authConfig>,
   ) {
     super({
-      jwtFromRequest: (req) => this.extractJwtFromCookie(req),
+      jwtFromRequest: (req: any) => this.extractJwtFromCookie(req),
       ignoreExpiration: false,
       secretOrKey: config.accessToken.secret,
     });
