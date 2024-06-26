@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService, ConfigType } from '@nestjs/config';
-import { ThrottlerModule } from '@nestjs/throttler';
+import { ThrottlerModule, ThrottlerModuleOptions } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerStorageRedisService } from 'nestjs-throttler-storage-redis';
 import rateLimitConfig, {
@@ -20,7 +20,7 @@ import { RedisService } from '../redis/services/redis.service';
       useFactory: (
         configService: ConfigService,
         redisService: RedisService,
-      ) => {
+      ): ThrottlerModuleOptions => {
         const config = configService.get<ConfigType<typeof rateLimitConfig>>(
           RATE_LIMIT_CONFIG_KEY,
         );
@@ -28,9 +28,14 @@ import { RedisService } from '../redis/services/redis.service';
           throw new Error('Rate limit configuration is not defined');
         }
         return {
-          ttl: config.ttl,
-          limit: config.limit,
           storage: new ThrottlerStorageRedisService(redisService),
+          throttlers: [
+            {
+              name: 'default',
+              ttl: config.ttl,
+              limit: config.limit,
+            },
+          ],
         };
       },
     }),
