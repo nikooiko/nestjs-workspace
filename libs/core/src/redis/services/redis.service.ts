@@ -11,6 +11,8 @@ import { LOGGER } from '../../logger/factories/logger.factory';
  */
 @Injectable()
 export class RedisService extends Redis implements OnModuleDestroy {
+  private readonly instanceId: string = crypto.randomUUID();
+
   constructor(
     @Inject(redisConfig.KEY)
     private readonly serviceConfig: ConfigType<typeof redisConfig>,
@@ -97,36 +99,83 @@ export class RedisService extends Redis implements OnModuleDestroy {
 
   async acquire(key: string, limit: number, ttl: number): Promise<number> {
     const acquireLua = `
-      local key = KEYS[1]
-      local limit = tonumber(ARGV[1])
-      local ttl = ARGV[2]
-      local current = tonumber(redis.call("GET", key) or "0")
-      if current >= limit then
-        return -1
+    local key = KEYS[1]
+    local instanceId = ARGV[1]
+    local limit = tonumber(ARGV[2])
+    local ttl = tonumber(ARGV[3])
+    local now = tonumber(ARGV[4])
+  
+    -- iterate over the hash to calculate current count and clean up expired entries
+    local count = 0 
+    local instanceCount = 0
+    local instancePairs = redis.call('HGETALL', key);
+    for i = 1, #instancePairs, 2 do
+      local id = instancePairs[i]
+      local data = instancePairs[i + 1]
+      local seats, expiresAt = string.match(data, '(%d+),(%d+)')
+      seats = tonumber(seats)
+      expiresAt = tonumber(expiresAt)
+  
+      if expiresAt < now then
+        -- expired, remove it
+        redis.call('HDEL', key, id)
+      else
+        count = count + seats
+        -- check if this is the instance id and collect the count, it will be needed later on.
+        if id == instanceId then
+          instanceCount = seats 
+        end
       end
-      current = current + 1
-      redis.call("SET", key, current)
-      if ttl ~= "" then
-        redis.call("PEXPIRE", key, tonumber(ttl))
-      end
-      return current
-    `;
-    const res = await this.eval(acquireLua, 1, key, limit, ttl);
+    end
+    
+    -- check if there is space and increment the count 
+    if count >= limit then
+      -- no space available
+      return -1 
+    end
+    -- there is space
+    local newExpiresAt = now + ttl
+    instanceCount = instanceCount + 1
+    redis.call('HSET', key, instanceId, instanceCount .. ',' .. newExpiresAt)
+    return count + 1 -- the semaphore's currently occupied seats
+  `;
+    const res = await this.eval(
+      acquireLua,
+      1,
+      key,
+      this.instanceId,
+      limit,
+      ttl,
+      Date.now(),
+    );
     return Number(res);
   }
 
   async release(key: string): Promise<number> {
     const releaseLua = `
-      local key = KEYS[1]
-      local current = tonumber(redis.call("GET", key) or "0")
-      if current == 0 then
-        return 0
-      end
-      current = current - 1
-      redis.call("SET", key, current, "KEEPTTL")
-      return current
-    `;
-    const res = await this.eval(releaseLua, 1, key);
+    local key = KEYS[1]
+    local instanceId = ARGV[1]
+
+    -- get instance seats and expiresAt (the latter will only be used to resave it as is)
+    local data = redis.call('HGET', key, instanceId) or '0,0';
+    local instanceCount, expiresAt = string.match(data, '(%d+),(%d+)')
+    instanceCount = tonumber(instanceCount)
+    expiresAt = tonumber(expiresAt)
+
+    if instanceCount == 0 then
+      return -1 -- release didn't actually release a seat
+    end
+    
+    -- we can release a seat
+    instanceCount = instanceCount - 1
+    if instanceCount == 0 then
+      redis.call('HDEL', key, instanceId)
+    else
+      redis.call('HSET', key, instanceId, instanceCount .. ',' .. expiresAt)
+    end
+    return instanceCount -- the instance's currently held seats
+  `;
+    const res = await this.eval(releaseLua, 1, key, this.instanceId);
     return Number(res);
   }
 }
