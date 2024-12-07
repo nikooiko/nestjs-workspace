@@ -4,6 +4,7 @@ import { ConfigType } from '@nestjs/config';
 import { Logger } from 'winston';
 import redisConfig from '../config/redis.config';
 import { LOGGER } from '../../logger/factories/logger.factory';
+import crypto from 'crypto';
 
 /**
  * This service should be used by modules that require direct access to ioredis client. The rest should use
