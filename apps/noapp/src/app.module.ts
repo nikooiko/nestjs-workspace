@@ -9,11 +9,13 @@ import { AppController } from './app.controller';
 import { ValidationModule } from '@app/core/validation/validation.module';
 import { ErrorHandlingModule } from '@app/core/error-handling/error-handling.module';
 import { PrometheusModule } from '@app/core/prometheus/prometheus.module';
+import { SecurityModule } from '@app/core/security/security.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot(),
     LoggerModule /* global */,
+    SecurityModule /* must be imported before other modules as it applies some security-related middleware */,
     ErrorHandlingModule,
     ValidationModule,
     CookiesModule,
