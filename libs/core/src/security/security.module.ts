@@ -1,7 +1,7 @@
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import helmet from 'helmet';
 import cors from 'cors';
-import { CookiesModule } from '@app/core/cookies/cookies.module';
+import { CookiesModule } from '../cookies/cookies.module';
 import { ConfigModule } from '@nestjs/config';
 import securityConfig from './config/security.config';
 import { CsrfService } from './services/csrf.service';

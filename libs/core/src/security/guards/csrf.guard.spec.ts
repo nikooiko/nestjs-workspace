@@ -26,8 +26,12 @@ export class TestAuthGuard implements CanActivate {
     context: ExecutionContext,
   ): boolean | Promise<boolean> | Observable<boolean> {
     const req = context.switchToHttp().getRequest();
+    const sessionId = req.cookies['sessionId'];
+    if (!sessionId) {
+      return false;
+    }
     // a test guard that simply enables csrf and sets the csrfId for later use
-    req.csrfId = 'test-session-id';
+    req.csrfId = sessionId;
     return true;
   }
 }
@@ -38,23 +42,32 @@ class TestController {
   constructor(private readonly csrf: CsrfService) {}
 
   @Post('login')
+  @HttpCode(204)
   login(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
-    req.csrfId = req.body.csrfId; // expects a csrfId in the body for demo purposes.
-    // csrfId is needed to enable csrf protection
-    this.csrf.generate(req, res);
-    return { route: 'login' };
+    // expects a sessionId (used as CSRF session ID also) in the body for demo purposes.
+    const sessionId = req.body.sessionId;
+    res.cookie('sessionId', sessionId); // attaches it to the req, to create the "session"
+    req.csrfId = sessionId; // this is needed by CSRF token generator
+    this.csrf.generate(req, res); // creates CSRF token and attaches it to cookies, enables CSRF protection
   }
 
   @Get('unprotected')
+  @HttpCode(204)
   unprotected() {
-    return { route: 'unprotected' };
+    return;
   }
 
   @Post('protected')
-  @HttpCode(200)
+  @HttpCode(204)
   @UseGuards(TestAuthGuard, CsrfGuard)
   protected() {
-    return { route: 'protected' };
+    return;
+  }
+
+  @Post('logout')
+  @HttpCode(204)
+  logout(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
+    this.csrf.destroy(req, res);
   }
 }
 
@@ -73,32 +86,22 @@ describe('Security', () => {
 
   describe('CSRF', () => {
     it('should do nothing for unprotected routes', async () => {
-      await request(app.getHttpServer())
-        .get('/unprotected')
-        .expect(200)
-        .expect({
-          route: 'unprotected',
-        });
+      await request(app.getHttpServer()).get('/unprotected').expect(204);
     });
     it('should fail with 403 for protected routes without CSRF', async () => {
       await request(app.getHttpServer())
         .post('/protected')
         .send({})
-        .expect(403)
-        .expect({
-          statusCode: 403,
-          message: 'Forbidden',
-          error: 'forbidden',
-        });
+        .expect(403);
     });
     it('should fail with 403 for protected routes with invalid CSRF', async () => {
       const agent = request.agent(app.getHttpServer());
       await agent
         .post('/login')
         .send({
-          csrfId: 'test-session-id',
+          sessionId: 'test-session-id',
         })
-        .expect(201);
+        .expect(204);
       const csrfToken = 'invalid-csrf-token';
       await agent
         .post('/protected')
@@ -111,34 +114,65 @@ describe('Security', () => {
       await agent
         .post('/login')
         .send({
-          csrfId: 'different-test-session-id',
+          sessionId: 'test-session-id',
         })
-        .expect(201);
-      const csrfToken =
-        agent.jar.getCookie('x-csrf-token-client', CookieAccessInfo.All)
-          ?.value || '';
+        .expect(204);
+      agent.jar.setCookie('sessionId=different-session-id', '127.0.0.1'); // alter session id to emulate different session
       await agent
         .post('/protected')
-        .set('x-csrf-token', csrfToken)
+        .set(
+          'x-csrf-token',
+          agent.jar.getCookie('x-csrf-token-client', CookieAccessInfo.All)
+            ?.value || '',
+        )
         .send({})
         .expect(403);
     });
-    it('should proceed with 200 for protected routes with valid CSRF', async () => {
+    it('should proceed with 204 for protected routes with valid CSRF', async () => {
       const agent = request.agent(app.getHttpServer());
       await agent
         .post('/login')
         .send({
-          csrfId: 'test-session-id',
+          sessionId: 'test-session-id',
         })
-        .expect(201);
-      const csrfToken =
-        agent.jar.getCookie('x-csrf-token-client', CookieAccessInfo.All)
-          ?.value || '';
+        .expect(204);
       await agent
         .post('/protected')
-        .set('x-csrf-token', csrfToken)
+        .set(
+          'x-csrf-token',
+          agent.jar.getCookie('x-csrf-token-client', CookieAccessInfo.All)
+            ?.value || '',
+        )
         .send({})
-        .expect(200);
+        .expect(204);
+    });
+    it('should fail with 403 for protected routes after logout', async () => {
+      const agent = request.agent(app.getHttpServer());
+      await agent
+        .post('/login')
+        .send({
+          sessionId: 'test-session-id',
+        })
+        .expect(204);
+      await agent
+        .post('/protected')
+        .set(
+          'x-csrf-token',
+          agent.jar.getCookie('x-csrf-token-client', CookieAccessInfo.All)
+            ?.value || '',
+        )
+        .send({})
+        .expect(204);
+      await agent.post('/logout').send().expect(204);
+      await agent
+        .post('/protected')
+        .set(
+          'x-csrf-token',
+          agent.jar.getCookie('x-csrf-token-client', CookieAccessInfo.All)
+            ?.value || '',
+        )
+        .send({})
+        .expect(403);
     });
   });
 
